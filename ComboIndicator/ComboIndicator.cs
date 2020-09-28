@@ -19,6 +19,7 @@ using static UnityEngine.GUI;
 namespace ComboIndicator {
 	public class ComboIndicator : MonoBehaviour {
 		private bool sceneChanged;
+		private bool firstCombo;
 
 		private GameManagerWrapper gameManager;
 		private SoloCounterWrapper soloCounter;
@@ -68,10 +69,23 @@ namespace ComboIndicator {
 						scoreManager = gameManager.ScoreManager;
 					}
 					lastCombo = 0;
+					firstCombo = true;
 				}
 			}
 			if (sceneName == "Gameplay" && !gameManager.IsNull()) {
 				int currentCombo = scoreManager.OverallCombo;
+				firstCombo = firstCombo && !gameManager.BasePlayers[0].FirstNoteMissed;
+				if (firstCombo && currentCombo == 30)
+                {
+					var textElement = new GameObject(string.Empty, new Type[] {
+						typeof(DancingText)
+					});
+					textElement.GetComponent<DancingText>().GameManager = gameManager;
+					textElement.GetComponent<DancingText>().Text = $"Hot start!";
+					textElement.GetComponent<DancingText>().Font = uiFont;
+					textElement.GetComponent<DancingText>().RaisedForSolo = true;
+					firstCombo = false;
+				}
 				if (currentCombo > 0 && currentCombo != lastCombo && (currentCombo == 50 || currentCombo % 100 /*100*/ == 0)) {
 					var textElement = new GameObject(string.Empty, new Type[] {
 						typeof(DancingText)
